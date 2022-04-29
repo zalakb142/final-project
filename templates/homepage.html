@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather API Home Page</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src='https://kit.fontawesome.com/1c6e696317.js' crossorigin='anonymous'></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.0.6/dist/MarkerCluster.css" />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.0.6/dist/MarkerCluster.Default.css">
+        <script src="https://unpkg.com/leaflet.markercluster@1.0.6/dist/leaflet.markercluster-src.js"></script>
+
+        <style>
+            body{
+                padding:0;
+                margin:0;
+            }
+            .front {
+                
+                width: 100%;
+                margin-left: 285px;    
+                            
+                
+            }
+            /* reference:https://www.w3schools.com/css/css_padding.asp */
+            .row{
+                background-color:#f2eec7;
+                padding-top: 25px;
+                padding-bottom:25px;
+
+            }
+            
+          
+            .Headingstyle {
+                font-size: 40px;                
+                color: black;
+                font-weight: bold;
+                padding-left:30%;
+                padding: 25px;
+                padding-bottom: 25px;
+                margin-left:30%;
+                font-family:cursive;                
+                
+            }
+
+            #map {
+               width: 100%;
+               height:650px;                         
+               
+            }
+            .mapstyle{
+                margin-left:0px;
+                opacity:1
+            }
+            
+           
+
+            .buttonStyle{
+              background-color: white;
+              font-family: cursive;
+              border:none;
+              font-weight:bold;
+              /* margin-left: 10%;   */
+              margin-right:10%;
+              border-radius: 10px;
+              color:black;
+              margin-left: 40px;
+              font-size:20px;
+              text-decoration: none;
+              cursor: pointer;
+              width:auto;
+              height:auto
+            }
+
+          
+
+            .buttonStyle:hover{
+                background-color: grey;
+                color:#73f0d3;
+            }
+
+            /* reference:https://www.w3schools.com/css/css_form.asp */
+            /* reference:https://www.w3schools.com/css/tryit.asp?filename=trycss_buttons_round */
+
+            .whole{
+            display: flex;
+            position: relative;
+            
+            }
+            
+
+            .NavBar{
+                font-family: cursive;
+                border:none;
+                width:250px;
+                height:100%;
+                padding-left: 0px;
+                padding-right:35px;                    
+                position:fixed;
+                background-color: #37383b;                    
+                opacity:0.8
+            }
+
+            .title{
+            font-size: 35px;
+            font-weight:bolder;
+            Color:white;
+            padding-left:80px
+            }
+
+            .NavBar ul li{
+
+                list-style-type: none;
+                font-size: 20px;
+                font-weight:bold;
+                Color:white;
+                padding-top:10px;  
+                padding-bottom:10px;
+                padding-left:0px;                      
+                margin-left:0px;             
+                                
+            
+            }    
+
+            .link{
+                text-decoration: none;
+                color:white;                    
+            
+            }          
+
+            .NavBar ul li:hover{
+            background-color:#262729;
+        
+            
+            }
+
+            /* reference:(for how to creat a sidebar)https://www.youtube.com/watch?v=YesSVqjcDts */
+                             
+               
+                
+              
+
+
+              
+            
+
+
+
+        </style>
+</head>
+     <body>
+       
+        <div class="whole">
+        
+            <div class="NavBar">
+                <h2 class="title">Menu</h2>
+                <ul>
+                    <li><a href="{{url_for('Basemap')}}" method="post" class="link"><i class="fas fa-temperature-high"></i>Weather Conditions</a></li>
+                    <li><a href="{{url_for('Air')}}" method="post" class="link"><i class="	fas fa-smog"></i>&nbspAir Pollution</a></li>
+                    <li><a href="{{url_for('activity_plan')}}" method="post" class="link"><i class="fas fa-umbrella-beach"></i>&nbspPlan Activities</a></li>
+                    <li><a href="#" class="link"><i class="fas fa-phone"></i>&nbspContact</a></li>
+                </ul> 
+            </div>
+
+            <div class="front">
+                <div class="container-fluid">
+                    <div class="row">
+                        <span class="Headingstyle">Weather API</span>                        
+                    </div>
+                    
+                </div> 
+                <div id="map" class="mapstyle"></div>
+                                 
+                
+            </div>
+            
+            <!--                             -->
+
+          
+        </div>
+         <!-- reference:(for how to creat a sidebar)https://www.youtube.com/watch?v=YesSVqjcDts  -->
+
+     
+        
+        <script type="text/javascript">
+
+            var map = L.map('map').setView([51.0447, -114.0719], 2);
+
+            var defaultmap =L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        </script>
+
+
+       
+
+
+    </body>
+</html>

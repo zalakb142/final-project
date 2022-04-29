@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+   integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+   crossorigin=""></script>
+  <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+	<link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+  <script src="../static/jquery-3.6.0.min.js"></script>
+</head>
+<style>
+  body { margin:0; padding:0; }
+  #map { 
+    position:absolute; 
+    height:80%; 
+    width:100%; 
+  }
+</style>
+<body>
+
+
+
+<h1>{{message}}</h1>
+
+<form action="{{ url_for('activities', user=user) }}", method="POST">
+  <label for="plan">Select activities for subscription:</label>
+  <select name="plan" id="plan">
+    <optgroup label="Travel plans">
+      <option value="Flight Delays">Flight Delays</option>
+      <option value="Flying Travel Index">Flying Travel Index</option>
+      <option value="Driving Travel Index">Driving Travel Index</option>
+    </optgroup>
+    <optgroup label="Indoor plans">
+      <option value="Indoor Activity Forecast">Indoor Activity Forecast</option>
+    </optgroup>
+    <optgroup label="Workout plans">
+      <option value="Running Forecast">Running Forecast</option>
+      <option value="Jogging Forecast">Jogging Forecast</option>
+      <option value="Hiking Forecast">Hiking Forecast</option>
+      <option value="Bicycling Forecast">Bicycling Forecast</option>
+    </optgroup>
+    <optgroup label="Sports plan">
+      <option value="Golf Weather Forecast">Golf Weather Forecast</option>
+      <option value="Tennis Forecast">Tennis Forecast</option>
+      <option value="Skateboarding Forecast">Skateboarding Forecast</option>
+      <option value="Ski Weather Forecast">Ski Weather Forecast</option>
+    </optgroup>
+    <optgroup label="Outdoor plans">
+      <option value="Outdoor Concert Forecast">Outdoor Concert Forecast</option>
+      <option value="Kite Flying Forecast">Kite Flying Forecast</option>
+      <option value="Beach & Pool Forecast">Beach & Pool Forecast</option>
+      <option value="Sailing Forecast">Sailing Forecast</option>
+      <option value="Stargazing Forecast">Stargazing Forecast</option>
+      <option value="Fishing Forecast">Fishing Forecast</option>
+      <option value="Construction Forecast">Construction Forecast</option>
+      <option value="Hunting Forecast">Hunting Forecast</option>
+      <option value="Outdoor Barbecue">Outdoor Barbecue</option>
+      <option value="Outdoor Activity Forecast">Outdoor Activity Forecast</option>
+      <option value="Shopping Forecast">Shopping Forecast</option>
+      <option value="Dog Walking Comfort Forecast">Dog Walking Comfort Forecast</option>
+      <option value="Lawn Mowing Forecast">Lawn Mowing Forecast</option>
+    </optgroup>
+    <optgroup label="Health precautions">
+      <option value="Healthy Heart Fitness Forecast">Healthy Heart Fitness Forecast</option>
+      <option value="Mosquito Activity Forecast">Mosquito Activity Forecast</option>
+      <option value="Arthritis Pain Forecast">Asthma Forecast</option>
+      <option value="Common Cold Forecast">Common Cold Forecast</option>
+      <option value="Flu Forecast">Flu Forecast</option>
+      <option value="Migraine Headache Forecast">Migraine Headache Forecast</option>
+      <option value="Sinus Headache Forecast">Sinus Headache Forecast</option>
+      <option value="Thirst Forecast">Thirst Forecast</option>
+    </optgroup>
+    <optgroup label="Environmental changes">
+      <option value="Dust & Dander Forecast">Dust & Dander Forecast</option>
+      <option value="Snow Days Forecast">Snow Days Forecast</option>
+    </optgroup>
+    <optgroup label="Resources forecast">
+      <option value="Home Energy Efficiency Forecast">Home Energy Efficiency Forecast</option>
+      <option value="Fuel Economy Forecast">Fuel Economy Forecast</option>
+      <option value="Composting Forecast">Composting Forecast</option>
+    </optgroup>
+  </select>
+  <input type="submit" value="Subscribe">
+</form>
+
+<a href="../unsub/{{user}}"><p>To unsubscribe, click here!</p></a>
+
+<div id="locations" data-locations='{{activitylist}}'></div> 
+<input type="text" id="test"  placeholder="Enter city, state/country" />
+<button onclick="submitMe('test'); return false;" id="testButton">Search By City</button>
+&nbsp; &nbsp;
+<button onclick="forecastMe('test'); return false;" id="testButton">Forecast By City (5 Days)</button>
+<br><br>
+<input type="text" id="coord"  placeholder="Enter latitude, longitude" />
+<button onclick="submitcord('coord'); return false;" id="testButton2">Search By Coordinates</button>
+&nbsp; &nbsp;
+<button onclick="forecastcord('coord'); return false;" id="testButton2">Forecast By Coordinates (5 Days)</button>
+<br><br>
+<div id="map"></div>
+
+
+<script>
+  L.mapbox.accessToken = 'pk.eyJ1IjoiemFsYWtiMTQiLCJhIjoiY2t6dTBzYThuMWo5djJ3cnh3bDl3dGNjeSJ9.gidlTMdQBoOF23iwCpBHFg';
+  var map = new L.map('map').setView([0, 0], 2);
+  L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+
+  
+  
+  function submitMe(id) {
+    map.off();
+    map.remove();
+    var info = $('#locations').data('locations');
+    info=info.replace("[([","");
+    info=info.replace("],)]","");
+    info=info.replaceAll('"',"");
+    info = info.split(", ");
+    var activities=[]
+    for (var j in info){
+      activities.push(info[j]);
+    }
+    var city = document.getElementById(id).value;
+    fetch(`http://dataservice.accuweather.com/locations/v1/cities/search?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&q=${city}&language=en`)
+    .then((response) => {
+      return response.json()
+    })
+    .then((data) => {
+      var val = data[0];
+      var loc_key=val.Key;
+      var lat=val.GeoPosition.Latitude;
+      var long=val.GeoPosition.Longitude;
+      fetch(`http://dataservice.accuweather.com/indices/v1/daily/1day/${loc_key}?apikey=%09SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&language=en`)
+      .then((response) => {
+          return response.json()
+      })
+      .then((data) => {
+          map = L.map('map').setView([lat, long], 8);
+          //var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution: '...', maxZoom: 18}).addTo(map);
+          L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+          marker = L.marker([lat, long]).addTo(map); 
+          var title="";
+          for(var i in data){
+              var val = data[i];
+              var name=val.Name;
+              var cat=val.Category;
+              for(j=0;j<activities.length;j++){
+                if("'"+name+"'"==activities[j]){ 
+                  title=title.concat("<b>"+name+"</b>: "+cat, "<br>"); 
+                }
+              } 
+          }
+          marker.bindPopup(title).openPopup();   
+            
+        }); 
+      });     
+  } 
+  
+  function submitcord(id) {
+    map.off();
+    map.remove();
+    var info = $('#locations').data('locations');
+    info=info.replace("[([","");
+    info=info.replace("],)]","");
+    info=info.replaceAll('"',"");
+    info = info.split(", ");
+    var activities=[]
+    for (var j in info){
+      activities.push(info[j]);
+    }
+    var lat_lng = document.getElementById(id).value;
+    fetch(`http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&q=${lat_lng}&language=en`)
+    .then((response) => {
+      return response.json()
+    })
+    .then((data) => {
+      // console.log(data);
+      // var val = data[0];
+      var loc_key=data.Key;
+      var lat=data.GeoPosition.Latitude;
+      var long=data.GeoPosition.Longitude;
+      fetch(`http://dataservice.accuweather.com/indices/v1/daily/1day/${loc_key}?apikey=%09SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&language=en`)
+      .then((response) => {
+          return response.json()
+      })
+      .then((data) => {
+          map = L.map('map').setView([lat, long], 8);
+          //var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution: '...', maxZoom: 18}).addTo(map);
+          L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+          marker = L.marker([lat, long]).addTo(map); 
+          var title="";
+          for(var i in data){
+              var val = data[i];
+              var name=val.Name;
+              var cat=val.Category;
+              for(j=0;j<activities.length;j++){
+                if("'"+name+"'"==activities[j]){ 
+                  title=title.concat("<b>"+name+"</b>: "+cat, "<br>"); 
+                }
+              } 
+          }
+          marker.bindPopup(title).openPopup();   
+            
+        }); 
+      });     
+  }
+
+  function forecastMe(id) {
+    map.off();
+    map.remove();
+    var info = $('#locations').data('locations');
+    info=info.replace("[([","");
+    info=info.replace("],)]","");
+    info=info.replaceAll('"',"");
+    info = info.split(", ");
+    var activities=[]
+    for (var j in info){
+      activities.push(info[j]);
+    }
+    var city = document.getElementById(id).value;
+    fetch(`http://dataservice.accuweather.com/locations/v1/cities/search?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&q=${city}&language=en`)
+    .then((response) => {
+      return response.json()
+    })
+    .then((data) => {
+      var val = data[0];
+      var loc_key=val.Key;
+      var lat=val.GeoPosition.Latitude;
+      var long=val.GeoPosition.Longitude;
+      fetch(`http://dataservice.accuweather.com/indices/v1/daily/5day/${loc_key}?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&language=en`)
+      .then((response) => {
+          return response.json()
+      })
+      .then((data) => {
+          map = L.map('map').setView([lat, long], 8);
+          //var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution: '...', maxZoom: 18}).addTo(map);
+          L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+          marker = L.marker([lat, long]).addTo(map); 
+          var title="";
+          for(var i in data){
+              var val = data[i];
+              var name=val.Name;
+              var cat=val.Category;
+              var date=val.LocalDateTime;
+              date=date.substr(0,10);
+              for(j=0;j<activities.length;j++){
+                if("'"+name+"'"==activities[j]){ 
+                  title=title.concat("<b>"+name+"</b>: "+cat+" on <b>"+date+"</b>, <br>"); 
+                }
+              } 
+          }
+          marker.bindPopup(title).openPopup();   
+            
+        }); 
+      }); 
+  }
+
+  function forecastcord(id) {
+    map.off();
+    map.remove();
+    var info = $('#locations').data('locations');
+    info=info.replace("[([","");
+    info=info.replace("],)]","");
+    info=info.replaceAll('"',"");
+    info = info.split(", ");
+    var activities=[]
+    for (var j in info){
+      activities.push(info[j]);
+    }
+    var lat_lng = document.getElementById(id).value;
+    fetch(`http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&q=${lat_lng}&language=en`)
+    .then((response) => {
+      return response.json()
+    })
+    .then((data) => {
+      // console.log(data);
+      // var val = data[0];
+      var loc_key=data.Key;
+      var lat=data.GeoPosition.Latitude;
+      var long=data.GeoPosition.Longitude;
+      fetch(`http://dataservice.accuweather.com/indices/v1/daily/5day/${loc_key}?apikey=SQIHbLsV4tTjhh7OJoubAbMONgI8fShG&language=en`)
+      .then((response) => {
+          return response.json()
+      })
+      .then((data) => {
+          map = L.map('map').setView([lat, long], 8);
+          //var baseLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution: '...', maxZoom: 18}).addTo(map);
+          L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+          marker = L.marker([lat, long]).addTo(map); 
+          var title="";
+          for(var i in data){
+              var val = data[i];
+              var name=val.Name;
+              var cat=val.Category;
+              var date=val.LocalDateTime;
+              date=date.substr(0,10);
+              for(j=0;j<activities.length;j++){
+                if("'"+name+"'"==activities[j]){ 
+                  title=title.concat("<b>"+name+"</b>: "+cat+" on <b>"+date+"</b>, <br>"); 
+                }
+              } 
+          }
+          marker.bindPopup(title).openPopup();   
+            
+        }); 
+      });     
+  }
+
+  
+  
+    
+
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+	<title>Air Pollution Map</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
+	<link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
+    <script src="../static/jquery-3.6.0.min.js"></script>
+
+	<style>
+        body{
+        padding:0;
+        margin:0;
+        }
+    html,body,#map{ position:absolute; height: 100%; width:100%}
+
+    .row {
+        padding: 5px;
+        padding-bottom: 5px;
+        background-color: #f2eec7;
+        text-align:center;
+    }
+    /* reference:https://www.w3schools.com/css/css_padding.asp */
+    div .Headingstyle {
+        font-size: 40px;
+        color: black;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .buttonStyle{
+        background-color: #58a2a3;
+        font-family: cursive;
+        border:none;
+        font-weight:bold;
+        /* margin-left: 10%;   */
+        margin-right:10%;
+        border-radius: 10px;
+        color: white;
+        padding: 4px 8px;
+        text-decoration: none;
+        cursor: pointer;
+        width:auto;
+        height:auto;
+        text-align: center;
+        margin: auto;
+        
+    }
+
+    .buttonStyle:hover{
+        background-color: #0f4a4f;
+        color:#73f0d3;
+    }
+
+    /* reference:https://www.w3schools.com/css/css_form.asp */
+    /* reference:https://www.w3schools.com/css/tryit.asp?filename=trycss_buttons_round */
+
+
+    .legend { text-align: left; line-height: 20px; color: #555; background-color: white; } .legend i { width: 25px; height: 20px; float: left; opacity: 1; }
+
+    /* reference: https://groups.google.com/g/google-maps-js-api-v3/c/H6TvI6wgYkU */
+
+    .mapdisplay {
+    height: 500px;
+    background-position: center;
+    /* background-repeat: no-repeat; */
+    background-size: cover;
+    position: relative;
+    opacity: 0.9;
+    }
+    .weather-text {
+    text-align: center;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    font-size: 10px;
+    /* transform: translate(-50%, -50%);  */
+    color: black;
+    background-color: white;
+    }
+
+    /* reference(using image for cover):https://www.w3schools.com/cssref/tryit.asp?filename=trycss3_background_hero
+    https://www.w3schools.com/css/tryit.asp?filename=trycss_image_text_bottom_right */
+
+
+    .popupBackground,.popupBackground2 {
+    background-color: #575b5c;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    opacity: 0.9;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    }
+
+
+    .popupwindow-contents,.popupwindow-contents2{
+    height: 550px;
+    width: 400px;
+    background-color: #e6ab77;
+    text-align: center;
+    padding-top:0px;
+
+    position: relative;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    }
+
+    .popupBackground3,.popupBackground4 {
+        background-color: #575b5c;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        opacity: 0.9;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .popupwindow-contents3{
+        height: 450px;
+        width: 85%;
+        background-color: #e6ab77;
+        text-align: center;
+        padding-top:0px;
+
+        position: relative;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: left;
+    }
+
+    .popupwindow-contents4{
+        height: 600px;
+        width: 350PX;
+        background-color: #e6ab77;
+        text-align: center;
+        padding-top:0px;
+
+        position: relative;
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: left;
+    }
+
+
+
+
+    .BoxIcon {
+    height: 150px;
+    width: 150px;
+    padding-left:50px;
+    color: yellow;
+    border-radius: 20%;
+    font-size: 115px;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+
+    }
+
+    .popuptext{
+    font-family: cursive;
+    font-size: 20px;
+    color: black;
+    font-weight: bold;
+    text-align: left;
+    }
+
+
+
+
+    /* reference:https://www.w3schools.com/css/tryit.asp?filename=trycss_form_button */
+
+
+    .closeWindow,.closeWindow2 {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    font-size: 30px;
+    color: black;
+    transform: rotate(45deg);
+    cursor: pointer;
+
+    }
+    
+
+    .popuptexttable{
+        font-family: cursive;
+        font-size: 15px;
+        color: black;
+        font-weight: bold;
+        text-align: left;
+    }
+
+
+
+
+    /* reference:https://www.w3schools.com/css/tryit.asp?filename=trycss_form_button */
+
+
+    .closeWindow3,.closeWindow4 {
+        position: absolute;
+        top: 0;
+        right: 15px;
+        font-size: 30px;
+        color: black;
+        transform: rotate(45deg);
+        cursor: pointer;
+
+    }
+    .form{
+        border: 1px solid #58a2a3;
+        border-radius:5%;
+        width:10%;
+        height:20px; 
+    }
+    .form:hover{
+        background-color: #d8f2f0;
+
+    }
+
+    .form2{
+        border: 1px solid #58a2a3;
+        border-radius:5%;
+        width:20%;
+        height:20px; 
+    }
+    .form2:hover{
+        background-color: #d8f2f0;
+
+    }
+
+    
+    .table {
+    border: 0px solid gray;
+    border-collapse: collapse;
+    margin-left:2px;
+    width:auto;
+    height:auto;
+    font-size:10px;
+    }
+
+    .table th {
+    border: 0px solid white;
+    padding: 5px;
+    text-align: center; 
+    font-family: cursive;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;         
+    
+    }
+
+    .table td {
+    border: 0px solid white;
+    padding: 5px;
+    text-align: center;            
+    font-family: cursive;
+    color: white;
+    font-weight: normal;
+    font-size: 15px;}
+    
+
+    .table td:hover {
+    background-color:#f78534;
+    }
+
+    .fontstyle{
+                
+    font-family: cursive;
+    color: #f78534;
+    font-weight: bold;
+    font-size: 15px;}
+
+
+    .grid{
+        
+        display: grid;
+        padding:1px;
+        grid-column-gap:1px;
+        grid-row-gap:1px;
+        grid-template-columns:200px 250px 350px auto;
+
+        }
+
+        .grid-item {               
+        font-size:16px;
+        padding:20px;
+        text-align: center;
+        }
+
+            
+
+        body{
+        padding:0;
+        margin:0;
+        }
+     
+
+      .legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity:1; }
+
+      /* reference: https://groups.google.com/g/google-maps-js-api-v3/c/H6TvI6wgYkU */
+    </style>
+
+	
+</head>
+    <body>
+        <div class="container-fluid">
+			<div class="row">
+				<span class="Headingstyle">Air Pollution Information</span>
+				<br><br>
+                <a href="{{url_for('index')}}"><button   class="buttonStyle">Home<i class="fa fa-home"></i></button></a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp               
+                 <!-- https://www.w3schools.com/w3css/w3css_icons.asp -->
+                 <a href="{{url_for('heatmap')}}"><button id = "heatmap" class="buttonStyle">Heat Map<i class="fas fa-cloud-sun"></i></button></a>
+				
+			</div>
+		</div>
+
+        <div id='map'></div>
+
+
+
+        <script type="text/javascript">
+
+        L.mapbox.accessToken = 'pk.eyJ1IjoiemFsYWtiMTQiLCJhIjoiY2t6dTBzYThuMWo5djJ3cnh3bDl3dGNjeSJ9.gidlTMdQBoOF23iwCpBHFg';
+        var map = new L.map('map').setView([0, 0], 2);
+        L.mapbox.styleLayer('mapbox://styles/zalakb14/ckzwvwiyf005x14quhrk8p3yg').addTo(map);
+
+        
+        map.on('click',function(e){
+            var lat = e.latlng.lat
+            var lon = e.latlng.lng                
+            var URL = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=5344aceac8319265941df3167e18af14`;
+            console.log(URL)
+            fetch(URL)
+            .then(res => res.json()).then(data =>{
+                AQI = data.list[0].main.aqi;
+                CO = data.list[0].components.co;
+                NO = data.list[0].components.no;
+                NO2 = data.list[0].components.no2;
+                PM10 = data.list[0].components.pm10;
+                O3 = data.list[0].components.o3;
+                PM25 = data.list[0].components.pm2_5;
+                SO2 = data.list[0].components.so2;
+                NH3 = data.list[0].components.nh3;
+                var popup = L.popup();
+                popup
+                .setLatLng(e.latlng)
+                .setContent(e.latlng.toString()+"<br>API: "+ API + "<br>Carbon monoxide: "+ CO + "μg/m3"
+                + "<br>Nitrogen monoxide: "+ NO + "μg/m3"+ "<br>Nitrogen dioxide: "+ NO2 + "μg/m3"
+                + "<br>Coarse particulate matter(PM10): "+ PM10 + "μg/m3"+ "<br>Ozone: "+ O3 + "μg/m3"
+                + "<br>Fine particles matter(PM2.5): "+ PM25 + "μg/m3"+ "<br>Sulphur dioxide: "+ SO2 + "μg/m3"
+                + "<br>Ammonia: "+ NH3 + "μg/m3")
+                .openOn(map);
+                //alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng + ",Pressure:" + Pressure)                    
+            })
+        }) 
+
+        </script>
+
+
+
+    </body>
+</html>
